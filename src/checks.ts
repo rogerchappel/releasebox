@@ -47,7 +47,10 @@ export async function checkReadiness(root: string): Promise<CheckResult[]> {
     { name: 'releasebox config', ok: Boolean(config), detail: config ? config.projectType : 'missing releasebox.config.json' },
     { name: 'ci workflow', ok: await exists(join(root, '.github/workflows/ci.yml')), detail: '.github/workflows/ci.yml' },
     { name: 'release dry run workflow', ok: await exists(join(root, '.github/workflows/release-dry-run.yml')), detail: '.github/workflows/release-dry-run.yml' },
-    { name: 'release readiness issue template', ok: await exists(join(root, '.github/ISSUE_TEMPLATE/release-readiness.md')), detail: '.github/ISSUE_TEMPLATE/release-readiness.md' }
+    { name: 'release readiness issue template', ok: await exists(join(root, '.github/ISSUE_TEMPLATE/release-readiness.md')), detail: '.github/ISSUE_TEMPLATE/release-readiness.md' },
+    { name: 'task breakdown', ok: await exists(join(root, 'docs/TASKS.md')), detail: 'docs/TASKS.md' },
+    { name: 'orchestration plan', ok: await exists(join(root, 'docs/ORCHESTRATION.md')), detail: 'docs/ORCHESTRATION.md' },
+    { name: 'dependabot config', ok: await exists(join(root, '.github/dependabot.yml')), detail: '.github/dependabot.yml' }
   ];
 
   if (!config || config.projectType === 'node-cli') {

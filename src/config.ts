@@ -1,6 +1,6 @@
 export type ProjectType = 'node-cli' | 'desktop-app' | 'capacitor-app' | 'library' | 'docs';
 
-export interface ReleaseForgeConfig {
+export interface ReleaseBoxConfig {
   projectType: ProjectType;
   packageManagers?: Array<'npm' | 'homebrew' | 'github-release'>;
   smoke?: {
@@ -16,9 +16,9 @@ export interface ReleaseForgeConfig {
 
 const projectTypes = new Set<ProjectType>(['node-cli', 'desktop-app', 'capacitor-app', 'library', 'docs']);
 
-export function parseReleaseForgeConfig(input: unknown): ReleaseForgeConfig {
+export function parseReleaseBoxConfig(input: unknown): ReleaseBoxConfig {
   if (!input || typeof input !== 'object') {
-    throw new Error('releaseforge config must be a JSON object');
+    throw new Error('releasebox config must be a JSON object');
   }
 
   const record = input as Record<string, unknown>;
@@ -28,13 +28,13 @@ export function parseReleaseForgeConfig(input: unknown): ReleaseForgeConfig {
 
   return {
     projectType: record.projectType as ProjectType,
-    packageManagers: Array.isArray(record.packageManagers) ? record.packageManagers as ReleaseForgeConfig['packageManagers'] : [],
-    smoke: typeof record.smoke === 'object' && record.smoke ? record.smoke as ReleaseForgeConfig['smoke'] : { commands: [] },
-    release: typeof record.release === 'object' && record.release ? record.release as ReleaseForgeConfig['release'] : { mode: 'reviewed', createGithubRelease: true }
+    packageManagers: Array.isArray(record.packageManagers) ? record.packageManagers as ReleaseBoxConfig['packageManagers'] : [],
+    smoke: typeof record.smoke === 'object' && record.smoke ? record.smoke as ReleaseBoxConfig['smoke'] : { commands: [] },
+    release: typeof record.release === 'object' && record.release ? record.release as ReleaseBoxConfig['release'] : { mode: 'reviewed', createGithubRelease: true }
   };
 }
 
-export function defaultConfig(projectType: ProjectType = 'node-cli'): ReleaseForgeConfig {
+export function defaultConfig(projectType: ProjectType = 'node-cli'): ReleaseBoxConfig {
   return {
     projectType,
     packageManagers: projectType === 'node-cli' ? ['npm', 'github-release'] : ['github-release'],

@@ -1,8 +1,8 @@
-# releaseforge
+# releasebox
 
 Issue-driven release readiness tooling for OSS CLIs and apps.
 
-`releaseforge` helps small OSS projects move toward continuous release without pretending that publishing is safe before the basics work. It gives each repo a repeatable path from GitHub issue tracking to strict CI, package smoke tests, release dry-runs, and reviewed release notes.
+`releasebox` helps small OSS projects move toward continuous release without pretending that publishing is safe before the basics work. It gives each repo a repeatable path from GitHub issue tracking to strict CI, package smoke tests, release dry-runs, and reviewed release notes.
 
 ## Why
 
@@ -14,12 +14,12 @@ Many OSS tools have code, tests, and READMEs, but still fail the real user path:
 4. produce a release with clear notes
 5. prove the published artifact works
 
-`releaseforge` makes those checks explicit and public.
+`releasebox` makes those checks explicit and public.
 
 ## Install
 
 ```sh
-npm install -D releaseforge
+npm install -D releasebox
 ```
 
 For local development in this repo:
@@ -27,7 +27,7 @@ For local development in this repo:
 ```sh
 npm install
 npm run build
-node bin/releaseforge.js --help
+node bin/releasebox.js --help
 ```
 
 ## Usage
@@ -35,19 +35,19 @@ node bin/releaseforge.js --help
 Create config:
 
 ```sh
-releaseforge init --type node-cli
+releasebox init --type node-cli
 ```
 
 Install GitHub workflows and issue templates:
 
 ```sh
-releaseforge install-templates
+releasebox install-templates
 ```
 
 Check release readiness:
 
 ```sh
-releaseforge check
+releasebox check
 ```
 
 ## Project types

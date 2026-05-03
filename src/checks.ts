@@ -1,6 +1,6 @@
 import { access, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { parseReleaseForgeConfig, type ReleaseForgeConfig } from './config.js';
+import { parseReleaseBoxConfig, type ReleaseBoxConfig } from './config.js';
 import { readJson } from './fs.js';
 
 export interface CheckResult {
@@ -18,10 +18,10 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
-export async function loadProjectConfig(root: string): Promise<ReleaseForgeConfig | null> {
-  const path = join(root, 'releaseforge.config.json');
+export async function loadProjectConfig(root: string): Promise<ReleaseBoxConfig | null> {
+  const path = join(root, 'releasebox.config.json');
   if (!(await exists(path))) return null;
-  return parseReleaseForgeConfig(await readJson(path));
+  return parseReleaseBoxConfig(await readJson(path));
 }
 
 export async function checkNodeCliProject(root: string): Promise<CheckResult[]> {
@@ -44,7 +44,7 @@ export async function checkNodeCliProject(root: string): Promise<CheckResult[]> 
 export async function checkReadiness(root: string): Promise<CheckResult[]> {
   const config = await loadProjectConfig(root);
   const base: CheckResult[] = [
-    { name: 'releaseforge config', ok: Boolean(config), detail: config ? config.projectType : 'missing releaseforge.config.json' },
+    { name: 'releasebox config', ok: Boolean(config), detail: config ? config.projectType : 'missing releasebox.config.json' },
     { name: 'ci workflow', ok: await exists(join(root, '.github/workflows/ci.yml')), detail: '.github/workflows/ci.yml' },
     { name: 'release dry run workflow', ok: await exists(join(root, '.github/workflows/release-dry-run.yml')), detail: '.github/workflows/release-dry-run.yml' },
     { name: 'release readiness issue template', ok: await exists(join(root, '.github/ISSUE_TEMPLATE/release-readiness.md')), detail: '.github/ISSUE_TEMPLATE/release-readiness.md' }

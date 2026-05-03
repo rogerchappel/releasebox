@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { defaultConfig, parseReleaseForgeConfig } from '../dist/index.js';
+import { defaultConfig, parseReleaseBoxConfig } from '../dist/index.js';
 
 test('default node cli config is reviewed and does not publish', () => {
   const config = defaultConfig('node-cli');
@@ -10,5 +10,5 @@ test('default node cli config is reviewed and does not publish', () => {
 });
 
 test('config parser rejects unknown project types', () => {
-  assert.throws(() => parseReleaseForgeConfig({ projectType: 'banana' }), /projectType/);
+  assert.throws(() => parseReleaseBoxConfig({ projectType: 'banana' }), /projectType/);
 });

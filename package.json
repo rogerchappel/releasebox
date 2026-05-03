@@ -1,17 +1,17 @@
 {
-  "name": "releaseforge",
+  "name": "releasebox",
   "version": "0.1.0",
   "description": "Issue-driven release readiness tooling for OSS CLIs and apps.",
   "type": "module",
   "bin": {
-    "releaseforge": "./bin/releaseforge.js"
+    "releasebox": "./bin/releasebox.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "tsc -p tsconfig.json --noEmit",
     "prepack": "npm run build",
-    "smoke": "npm run build && node bin/releaseforge.js --help && node bin/releaseforge.js --version",
+    "smoke": "npm run build && node bin/releasebox.js --help && node bin/releasebox.js --version",
     "package:smoke": "npm run build && node scripts/package-smoke.mjs .",
     "release:check": "npm run lint && npm test && npm run smoke && npm run package:smoke && npm pack --dry-run"
   },
@@ -39,12 +39,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/roger/releaseforge.git"
+    "url": "git+https://github.com/roger/releasebox.git"
   },
   "bugs": {
-    "url": "https://github.com/roger/releaseforge/issues"
+    "url": "https://github.com/roger/releasebox/issues"
   },
-  "homepage": "https://github.com/roger/releaseforge#readme",
+  "homepage": "https://github.com/roger/releasebox#readme",
   "packageManager": "npm@11.6.2",
   "publishConfig": {
     "access": "public",

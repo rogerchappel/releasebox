@@ -12,7 +12,7 @@ Recommended shapes:
 
 ## Per-repo commit sequence
 
-1. Add `releaseforge.config.json`
+1. Add `releasebox.config.json`
 2. Add GitHub workflows
 3. Add release issue templates and labels
 4. Add or tighten `smoke` script
@@ -25,7 +25,7 @@ Recommended shapes:
 
 A dogfood repo is done only when:
 
-- `releaseforge check` passes
+- `releasebox check` passes
 - CI would run all deterministic gates
 - local smoke passes
 - package smoke passes

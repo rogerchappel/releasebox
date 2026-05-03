@@ -10,17 +10,17 @@ import { renderReleaseNotes } from './releaseNotes.js';
 const version = '0.1.0';
 
 function help(): string {
-  return `releaseforge ${version}
+  return `releasebox ${version}
 
 Issue-driven release readiness tooling for OSS CLIs and apps.
 
 Usage:
-  releaseforge init [--type node-cli]
-  releaseforge check [path]
-  releaseforge install-templates [path]
-  releaseforge notes [path]
-  releaseforge --help
-  releaseforge --version
+  releasebox init [--type node-cli]
+  releasebox check [path]
+  releasebox install-templates [path]
+  releasebox notes [path]
+  releasebox --help
+  releasebox --version
 `;
 }
 
@@ -43,8 +43,8 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
   const [command] = args;
   if (command === 'init') {
     const type = (readFlag(args, '--type') ?? 'node-cli') as ProjectType;
-    await writeJson(resolve(cwd(), 'releaseforge.config.json'), defaultConfig(type));
-    console.log(`created releaseforge.config.json for ${type}`);
+    await writeJson(resolve(cwd(), 'releasebox.config.json'), defaultConfig(type));
+    console.log(`created releasebox.config.json for ${type}`);
     return 0;
   }
 

@@ -55,8 +55,7 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
   if (command === 'install-templates') {
     const root = resolve(cwd(), args[1] ?? '.');
     const written = await installGithubTemplates({ targetRoot: root });
-    console.log(written.map((path) => `created ${path}`).join('
-'));
+    console.log(written.map((path) => `created ${path}`).join('\n'));
     return 0;
   }
 

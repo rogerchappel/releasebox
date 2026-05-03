@@ -39,12 +39,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/roger/releasebox.git"
+    "url": "git+https://github.com/rogerchappel/releasebox.git"
   },
   "bugs": {
-    "url": "https://github.com/roger/releasebox/issues"
+    "url": "https://github.com/rogerchappel/releasebox/issues"
   },
-  "homepage": "https://github.com/roger/releasebox#readme",
+  "homepage": "https://github.com/rogerchappel/releasebox#readme",
   "packageManager": "npm@11.6.2",
   "publishConfig": {
     "access": "public",

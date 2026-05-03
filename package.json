@@ -36,5 +36,18 @@
   "devDependencies": {
     "@types/node": "^25.6.0",
     "typescript": "^5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roger/releaseforge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/roger/releaseforge/issues"
+  },
+  "homepage": "https://github.com/roger/releaseforge#readme",
+  "packageManager": "npm@11.6.2",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

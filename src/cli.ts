@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { defaultConfig, type ProjectType } from './config.js';
 import { writeJson } from './fs.js';
 import { checkReadiness, summarize } from './checks.js';
+import { installGithubTemplates } from './template.js';
 
 const version = '0.1.0';
 
@@ -14,6 +15,7 @@ Issue-driven release readiness tooling for OSS CLIs and apps.
 Usage:
   releaseforge init [--type node-cli]
   releaseforge check [path]
+  releaseforge install-templates [path]
   releaseforge --help
   releaseforge --version
 `;
@@ -48,6 +50,14 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
     const results = await checkReadiness(root);
     console.log(summarize(results));
     return results.every((result) => result.ok) ? 0 : 1;
+  }
+
+  if (command === 'install-templates') {
+    const root = resolve(cwd(), args[1] ?? '.');
+    const written = await installGithubTemplates({ targetRoot: root });
+    console.log(written.map((path) => `created ${path}`).join('
+'));
+    return 0;
   }
 
   console.error(`unknown command: ${command}`);

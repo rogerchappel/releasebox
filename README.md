@@ -86,3 +86,22 @@ Initial targets should be real Roger OSS repos with different shapes:
 - a workflow/tooling repo that needs release notes and package proof
 
 Each dogfood PR should be atomic: config, workflows, issue templates, smoke script, package smoke, docs, and fixes as separate commits.
+
+## First dogfood targets
+
+The first rollout batch should be:
+
+1. `proofdock` — TypeScript CLI with clean build/test/smoke/pack baseline.
+2. `lockfilelens` — TypeScript CLI with richer fixture coverage and executable build step.
+3. `failureseed` — small JavaScript CLI that proves the standard is not TypeScript-only.
+
+Per repo, keep the audit trail granular:
+
+1. package metadata
+2. local release gate
+3. CI release-readiness workflow
+4. release dry-run workflow
+5. issue templates and labels
+6. package install smoke
+7. realistic e2e fixture
+8. docs/checklist

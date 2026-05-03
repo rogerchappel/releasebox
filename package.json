@@ -11,7 +11,9 @@
     "test": "node --test tests/*.test.mjs",
     "lint": "tsc -p tsconfig.json --noEmit",
     "prepack": "npm run build",
-    "smoke": "npm run build && node bin/releaseforge.js --help && node bin/releaseforge.js --version"
+    "smoke": "npm run build && node bin/releaseforge.js --help && node bin/releaseforge.js --version",
+    "package:smoke": "npm run build && node scripts/package-smoke.mjs .",
+    "release:check": "npm run lint && npm test && npm run smoke && npm run package:smoke && npm pack --dry-run"
   },
   "keywords": [
     "release",

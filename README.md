@@ -87,6 +87,16 @@ Initial targets should be real Roger OSS repos with different shapes:
 
 Each dogfood PR should be atomic: config, workflows, issue templates, smoke script, package smoke, docs, and fixes as separate commits.
 
+
+## Project operating files
+
+ReleaseBox follows the StackForge repo operating style:
+
+- `docs/TASKS.md` tracks build slices and acceptance criteria.
+- `docs/ORCHESTRATION.md` tracks agent lanes, review gates, and dogfood rollout rules.
+- `.github/dependabot.yml` keeps npm and GitHub Actions dependencies moving.
+- GitHub issue templates make release readiness and e2e gaps public-trackable.
+
 ## First dogfood targets
 
 The first rollout batch should be:

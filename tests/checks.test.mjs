@@ -16,9 +16,13 @@ test('readiness check accepts basic node cli package metadata', async () => {
   const root = await mkdtemp(join(tmpdir(), 'releasebox-check-'));
   await mkdir(join(root, '.github/workflows'), { recursive: true });
   await mkdir(join(root, '.github/ISSUE_TEMPLATE'), { recursive: true });
+  await mkdir(join(root, 'docs'), { recursive: true });
   await writeFile(join(root, '.github/workflows/ci.yml'), 'name: CI\n');
   await writeFile(join(root, '.github/workflows/release-dry-run.yml'), 'name: Release dry run\n');
   await writeFile(join(root, '.github/ISSUE_TEMPLATE/release-readiness.md'), '# Release readiness\n');
+  await writeFile(join(root, '.github/dependabot.yml'), 'version: 2\n');
+  await writeFile(join(root, 'docs/TASKS.md'), '# Tasks\n');
+  await writeFile(join(root, 'docs/ORCHESTRATION.md'), '# Orchestration\n');
   await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({ projectType: 'node-cli' }));
   await writeFile(join(root, 'package.json'), JSON.stringify({ scripts: { test: 'node --test', build: 'tsc', smoke: 'node cli.js --help' }, bin: './cli.js' }));
 

@@ -1,0 +1,32 @@
+name: Release dry run
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - releaseforge.config.json
+      - package.json
+      - .github/workflows/release*.yml
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run smoke --if-present
+      - run: npm pack --dry-run
+      - name: Release notes preview
+        run: |
+          echo "## Release candidate" > release-notes-preview.md
+          git log --oneline --max-count=20 >> release-notes-preview.md
+          cat release-notes-preview.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-notes-preview
+          path: release-notes-preview.md

@@ -3,7 +3,7 @@ export interface CommitSummaryInput {
   commits: string[];
 }
 
-type ChangeGroup = 'Features' | 'Fixes' | 'CI and release' | 'Documentation' | 'Maintenance';
+type ChangeGroup = 'Features' | 'Fixes' | 'CI and release' | 'Documentation' | 'Dependencies' | 'Maintenance';
 
 interface ParsedCommit {
   raw: string;
@@ -11,6 +11,7 @@ interface ParsedCommit {
   type?: string;
   scope?: string;
   summary: string;
+  subject: string;
   group: ChangeGroup;
 }
 
@@ -19,7 +20,8 @@ const groupRank: Record<ChangeGroup, number> = {
   Fixes: 1,
   'CI and release': 2,
   Documentation: 3,
-  Maintenance: 4,
+  Dependencies: 4,
+  Maintenance: 5,
 };
 
 const typeAreas: Record<string, string> = {
@@ -54,6 +56,10 @@ function humanArea(value: string): string {
     .join(' ');
 }
 
+function isMergeCommitSubject(subject: string): boolean {
+  return /^merge pull request #\d+ from /i.test(subject) || /^merge branch /i.test(subject);
+}
+
 function parseCommit(commit: string): ParsedCommit {
   const trimmed = commit.trim();
   const hashMatch = trimmed.match(/^([a-f0-9]{7,40})\s+(.+)$/i);
@@ -68,25 +74,31 @@ function parseCommit(commit: string): ParsedCommit {
   let group: ChangeGroup = 'Maintenance';
   if (type === 'feat') group = 'Features';
   else if (type === 'fix') group = 'Fixes';
-  else if (type === 'ci' || type === 'build' || normalized.includes('release') || normalized.includes('dependabot')) group = 'CI and release';
+  else if (type === 'ci' || type === 'build' || normalized.includes('release')) group = 'CI and release';
   else if (type === 'docs') group = 'Documentation';
+  else if (scope?.startsWith('deps') || normalized.includes('dependabot')) group = 'Dependencies';
 
-  return { raw: trimmed, hash, type, scope, summary, group };
+  return { raw: trimmed, hash, type, scope, summary, subject, group };
+}
+
+function areaForCommit(commit: ParsedCommit): string {
+  if (commit.group === 'Dependencies') return 'Dependencies';
+  return commit.scope ? humanArea(commit.scope) : typeAreas[commit.type ?? ''] ?? commit.group;
 }
 
 function formatChange(commit: ParsedCommit): string {
-  const area = commit.scope ? humanArea(commit.scope) : typeAreas[commit.type ?? ''] ?? commit.group;
   const suffix = commit.hash ? ` (${commit.hash.slice(0, 7)})` : '';
-  return `- ${area}: ${finishSentence(sentenceCase(commit.summary))}${suffix}`;
+  return `- ${areaForCommit(commit)}: ${finishSentence(sentenceCase(commit.summary))}${suffix}`;
 }
 
 function formatHighlight(commit: ParsedCommit): string {
-  const area = commit.scope ? humanArea(commit.scope) : typeAreas[commit.type ?? ''] ?? commit.group;
-  return `- ${area}: ${finishSentence(sentenceCase(commit.summary))}`;
+  return `- ${areaForCommit(commit)}: ${finishSentence(sentenceCase(commit.summary))}`;
 }
 
 export function renderReleaseNotes(input: CommitSummaryInput): string {
-  const parsed = input.commits.map(parseCommit).filter((commit) => commit.raw.length > 0);
+  const parsed = input.commits
+    .map(parseCommit)
+    .filter((commit) => commit.raw.length > 0 && !isMergeCommitSubject(commit.subject));
   const title = input.since ? `Release candidate since ${input.since}` : 'Release candidate';
   const lines = [`# ${title}`, '', '### Highlights', ''];
   const highlightCommits = parsed.filter((commit) => ['Features', 'Fixes', 'CI and release'].includes(commit.group)).slice(0, 5);

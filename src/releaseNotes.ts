@@ -124,7 +124,9 @@ export function renderReleaseNotes(input: CommitSummaryInput): string {
   }
 
   lines.push('', '### Contributors', '');
-  const contributors = [...new Set(input.contributors ?? [])].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  const contributors = [...new Set(input.contributors ?? [])]
+    .filter((contributor) => !/\[bot\]$/.test(contributor))
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
   if (contributors.length === 0) {
     lines.push('- No contributors detected from commit history.');
   } else {

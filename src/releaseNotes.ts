@@ -132,7 +132,11 @@ export function renderReleaseNotes(input: CommitSummaryInput): string {
   } else {
     for (const contributor of contributors) {
       const login = contributor.match(/^@([A-Za-z0-9-]+)$/)?.[1];
-      lines.push(login ? `- [@${login}](https://github.com/${login})` : `- ${contributor}`);
+      lines.push(
+        login
+          ? `- <a href="https://github.com/${login}"><img src="https://github.com/${login}.png?size=64" width="24" height="24" alt="@${login}" /></a> [@${login}](https://github.com/${login})`
+          : `- ${contributor}`,
+      );
     }
   }
 

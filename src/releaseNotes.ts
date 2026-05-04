@@ -109,8 +109,5 @@ export function renderReleaseNotes(input: CommitSummaryInput): string {
       lines.push(formatChange(commit));
     }
   }
-
-  lines.push('', '### Verification', '', '- [ ] CI passed', '- [ ] Package smoke passed', '- [ ] Release dry-run passed');
-  lines.push('', '### Artifacts', '', '- [ ] npm package tarball reviewed', '- [ ] GitHub release artifact reviewed');
   return `${lines.join('\n')}\n`;
 }

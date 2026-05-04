@@ -2,15 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { renderReleaseNotes } from '../dist/index.js';
 
-test('release notes include OpenClaw-style sections and verification checklist', () => {
+test('release notes include OpenClaw-style sections', () => {
   const notes = renderReleaseNotes({ since: 'v0.1.0', commits: ['abc1234 feat(cli): add thing'] });
   assert.match(notes, /Release candidate since v0.1.0/);
   assert.match(notes, /### Highlights/);
   assert.match(notes, /- Cli: Add thing\./);
   assert.match(notes, /### Changes/);
   assert.match(notes, /- Cli: Add thing\. \(abc1234\)/);
-  assert.match(notes, /Package smoke passed/);
-  assert.match(notes, /### Artifacts/);
+  assert.doesNotMatch(notes, /### Verification/);
+  assert.doesNotMatch(notes, /### Artifacts/);
 });
 
 test('release notes produce flat deterministic change bullets', () => {

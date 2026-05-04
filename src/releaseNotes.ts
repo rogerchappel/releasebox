@@ -131,7 +131,8 @@ export function renderReleaseNotes(input: CommitSummaryInput): string {
     lines.push('- No contributors detected from commit history.');
   } else {
     for (const contributor of contributors) {
-      lines.push(`- ${contributor}`);
+      const login = contributor.match(/^@([A-Za-z0-9-]+)$/)?.[1];
+      lines.push(login ? `- [@${login}](https://github.com/${login})` : `- ${contributor}`);
     }
   }
 

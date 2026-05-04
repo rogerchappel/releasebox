@@ -39,5 +39,5 @@ test('release notes produce flat deterministic change bullets', () => {
   assert.ok(notes.indexOf('Docs') < notes.indexOf('Dependencies'));
   assert.match(notes, /### Contributors/);
   assert.match(notes, /- Ada Lovelace/);
-  assert.match(notes, /- @rogerchappel/);
+  assert.match(notes, /- \[@rogerchappel\]\(https:\/\/github\.com\/rogerchappel\)/);
 });

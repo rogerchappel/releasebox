@@ -3,7 +3,34 @@ import { promisify } from 'node:util';
 
 const exec = promisify(execFile);
 
+export interface RecentCommitsResult {
+  since?: string;
+  commits: string[];
+}
+
+async function git(root: string, args: string[]): Promise<string> {
+  const { stdout } = await exec('git', args, { cwd: root });
+  return stdout.trim();
+}
+
+async function latestReachableTag(root: string): Promise<string | undefined> {
+  try {
+    return await git(root, ['describe', '--tags', '--abbrev=0']);
+  } catch {
+    return undefined;
+  }
+}
+
+export async function recentCommits(root: string, maxCount = 20): Promise<RecentCommitsResult> {
+  const since = await latestReachableTag(root);
+  const range = since ? [`${since}..HEAD`] : [`--max-count=${maxCount}`];
+  const stdout = await git(root, ['log', ...range, '--pretty=format:%h %s']);
+  return {
+    since,
+    commits: stdout.split('\n').map((line: string) => line.trim()).filter(Boolean),
+  };
+}
+
 export async function recentCommitSubjects(root: string, maxCount = 20): Promise<string[]> {
-  const { stdout } = await exec('git', ['log', `--max-count=${maxCount}`, '--pretty=format:%h %s'], { cwd: root });
-  return stdout.split('\n').map((line: string) => line.trim()).filter(Boolean);
+  return (await recentCommits(root, maxCount)).commits;
 }

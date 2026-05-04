@@ -4,7 +4,7 @@ import { defaultConfig, type ProjectType } from './config.js';
 import { writeJson } from './fs.js';
 import { checkReadiness, summarize } from './checks.js';
 import { installGithubTemplates } from './template.js';
-import { recentCommitSubjects } from './git.js';
+import { recentCommits } from './git.js';
 import { renderReleaseNotes } from './releaseNotes.js';
 
 const version = '0.1.0';
@@ -64,8 +64,8 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
 
   if (command === 'notes') {
     const root = resolve(cwd(), args[1] ?? '.');
-    const commits = await recentCommitSubjects(root);
-    console.log(renderReleaseNotes({ commits }));
+    const result = await recentCommits(root);
+    console.log(renderReleaseNotes(result));
     return 0;
   }
 

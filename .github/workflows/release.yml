@@ -29,7 +29,11 @@ jobs:
       - run: npm run smoke --if-present
       - run: npm pack
       - name: Generate release notes
-        run: node bin/releasebox.js notes . > RELEASE_NOTES.md
+        run: |
+          if ! npm run release:notes --if-present -- . > RELEASE_NOTES.md || [ ! -s RELEASE_NOTES.md ]; then
+            echo "## Changes" > RELEASE_NOTES.md
+            git log --oneline $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo HEAD~20)..HEAD >> RELEASE_NOTES.md
+          fi
       - uses: softprops/action-gh-release@v2
         with:
           body_path: RELEASE_NOTES.md

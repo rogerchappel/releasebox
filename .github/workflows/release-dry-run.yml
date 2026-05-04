@@ -26,8 +26,13 @@ jobs:
       - run: npm pack --dry-run
       - name: Release notes preview
         run: |
-          node bin/releasebox.js notes . > release-notes-preview.md
-          cat release-notes-preview.md
+          if npm run release:notes --if-present -- . > release-notes-preview.md && [ -s release-notes-preview.md ]; then
+            cat release-notes-preview.md
+          else
+            echo "## Release candidate" > release-notes-preview.md
+            git log --oneline --max-count=20 >> release-notes-preview.md
+            cat release-notes-preview.md
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: release-notes-preview

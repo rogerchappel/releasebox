@@ -13,7 +13,8 @@
     "prepack": "npm run build",
     "smoke": "npm run build && node bin/releasebox.js --help && node bin/releasebox.js --version",
     "package:smoke": "npm run build && node scripts/package-smoke.mjs .",
-    "release:check": "npm run lint && npm test && npm run smoke && npm run package:smoke && npm pack --dry-run"
+    "release:check": "npm run lint && npm test && npm run smoke && npm run package:smoke && npm pack --dry-run",
+    "release:notes": "node bin/releasebox.js notes"
   },
   "keywords": [
     "release",

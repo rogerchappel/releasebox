@@ -33,7 +33,5 @@ jobs:
             git log --oneline --max-count=20 >> release-notes-preview.md
             cat release-notes-preview.md
           fi
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-notes-preview
-          path: release-notes-preview.md
+      - name: Publish release notes summary
+        run: cat release-notes-preview.md >> "$GITHUB_STEP_SUMMARY"

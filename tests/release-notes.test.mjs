@@ -9,6 +9,8 @@ test('release notes include OpenClaw-style sections', () => {
   assert.match(notes, /- Cli: Add thing\./);
   assert.match(notes, /### Changes/);
   assert.match(notes, /- Cli: Add thing\. \(abc1234\)/);
+  assert.match(notes, /### Contributors/);
+  assert.match(notes, /- No contributors detected from commit history\./);
   assert.doesNotMatch(notes, /### Verification/);
   assert.doesNotMatch(notes, /### Artifacts/);
 });
@@ -23,6 +25,7 @@ test('release notes produce flat deterministic change bullets', () => {
       '5555555 chore(deps-dev): bump typescript from 5.9.3 to 6.0.3',
       '6666666 Merge pull request #4 from rogerchappel/dependabot/npm_and_yarn/typescript-6.0.3',
     ],
+    contributors: ['@rogerchappel', '@dependabot[bot]', '@rogerchappel', 'Ada Lovelace'],
   });
   assert.match(notes, /- Dry Run: Repair dry run\. \(2222222\)/);
   assert.match(notes, /- CI\/release: Add release workflow\. \(3333333\)/);
@@ -34,4 +37,7 @@ test('release notes produce flat deterministic change bullets', () => {
   assert.ok(notes.indexOf('Dry Run') < notes.indexOf('CI/release'));
   assert.ok(notes.indexOf('CI/release') < notes.indexOf('Docs'));
   assert.ok(notes.indexOf('Docs') < notes.indexOf('Dependencies'));
+  assert.match(notes, /### Contributors/);
+  assert.match(notes, /- Ada Lovelace/);
+  assert.match(notes, /- @rogerchappel/);
 });

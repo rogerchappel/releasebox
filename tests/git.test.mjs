@@ -32,6 +32,7 @@ test('recent commits ignore a tag pointing at HEAD when choosing the previous re
   assert.equal(result.since, undefined);
   assert.equal(result.commits.length, 1);
   assert.match(result.commits[0], /feat: first release/);
+  assert.deepEqual(result.contributors, ['ReleaseBox Test']);
 
   await commit(root, 'two.txt', 'fix: second release');
   await git(root, ['tag', 'v0.2.0']);
@@ -40,4 +41,5 @@ test('recent commits ignore a tag pointing at HEAD when choosing the previous re
   assert.equal(second.since, 'v0.1.0');
   assert.equal(second.commits.length, 1);
   assert.match(second.commits[0], /fix: second release/);
+  assert.deepEqual(second.contributors, ['ReleaseBox Test']);
 });

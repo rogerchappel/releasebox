@@ -1,6 +1,7 @@
 export interface CommitSummaryInput {
   since?: string;
   commits: string[];
+  contributors?: string[];
 }
 
 type ChangeGroup = 'Features' | 'Fixes' | 'CI and release' | 'Documentation' | 'Dependencies' | 'Maintenance';
@@ -121,5 +122,16 @@ export function renderReleaseNotes(input: CommitSummaryInput): string {
       lines.push(formatChange(commit));
     }
   }
+
+  lines.push('', '### Contributors', '');
+  const contributors = [...new Set(input.contributors ?? [])].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  if (contributors.length === 0) {
+    lines.push('- No contributors detected from commit history.');
+  } else {
+    for (const contributor of contributors) {
+      lines.push(`- ${contributor}`);
+    }
+  }
+
   return `${lines.join('\n')}\n`;
 }

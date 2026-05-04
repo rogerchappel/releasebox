@@ -13,9 +13,18 @@ async function git(root: string, args: string[]): Promise<string> {
   return stdout.trim();
 }
 
-async function latestReachableTag(root: string): Promise<string | undefined> {
+async function hasTagPointingAtHead(root: string): Promise<boolean> {
   try {
-    return await git(root, ['describe', '--tags', '--abbrev=0']);
+    return (await git(root, ['tag', '--points-at', 'HEAD'])).length > 0;
+  } catch {
+    return false;
+  }
+}
+
+async function latestReachableTag(root: string): Promise<string | undefined> {
+  const ref = (await hasTagPointingAtHead(root)) ? 'HEAD^' : 'HEAD';
+  try {
+    return await git(root, ['describe', '--tags', '--abbrev=0', ref]);
   } catch {
     return undefined;
   }

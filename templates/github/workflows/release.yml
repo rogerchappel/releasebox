@@ -29,7 +29,7 @@ jobs:
       - run: npm pack
       - name: Generate release notes
         run: |
-          if ! npm run release:notes --if-present -- . > RELEASE_NOTES.md || [ ! -s RELEASE_NOTES.md ]; then
+          if ! npm run --silent release:notes --if-present -- . > RELEASE_NOTES.md || [ ! -s RELEASE_NOTES.md ]; then
             echo "## Changes" > RELEASE_NOTES.md
             git log --oneline $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo HEAD~20)..HEAD >> RELEASE_NOTES.md
           fi

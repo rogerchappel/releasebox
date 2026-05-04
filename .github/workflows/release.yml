@@ -25,8 +25,7 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
       - run: npm ci
-      - run: npm test
-      - run: npm run smoke --if-present
+      - run: npm run release:check
       - run: npm pack
       - name: Generate release notes
         run: |

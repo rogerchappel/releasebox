@@ -15,19 +15,21 @@ Required checks:
 - packed package can be installed in a temporary project
 - installed binary can run `--help` and `--version`
 - at least one realistic fixture workflow asserts output
-- release notes can be generated from recent commits/PRs/issues
+- release notes can be generated from changes since the last release tag
 
 ## GitHub release standard
 
-A release candidate issue should capture:
+A release candidate PR should update or prove:
 
 - target version
-- included commits/PRs/issues
+- included commits/PRs since the last release tag
 - user-facing changes
 - breaking changes
 - package/artifact targets
 - dry-run evidence
 - post-release verification evidence
+
+Scheduled automation should maintain one rolling release-candidate PR per repo. If an open candidate already exists, update it instead of opening another.
 
 ## Publishing standard
 
@@ -47,7 +49,7 @@ Prefer many atomic commits:
 
 - config only
 - workflow only
-- issue templates only
+- release workflow only
 - smoke script only
 - fixture test only
 - release notes generator only

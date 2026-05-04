@@ -2,7 +2,7 @@
 
 ## StackForge Scaffold Note
 
-This repo was initially created manually and then corrected to follow the StackForge operating style. That miss is intentional context for future work: ReleaseBox itself must help prevent repos from skipping task docs, orchestration docs, dependency automation, release gates, and public issue tracking.
+This repo was initially created manually and then corrected to follow the StackForge operating style. That miss is intentional context for future work: ReleaseBox itself must help prevent repos from skipping task docs, orchestration docs, dependency automation, release gates, and visible release automation.
 
 Future repos should be created through StackForge templates once ReleaseBox is integrated there.
 
@@ -10,7 +10,7 @@ Future repos should be created through StackForge templates once ReleaseBox is i
 
 - **Lane 1: ReleaseBox core CLI** — maintain command surface, config parsing, readiness checks, and template installation.
 - **Lane 2: Deterministic release gates** — package install smoke, `npm pack` proof, CI gates, and release dry-runs.
-- **Lane 3: GitHub public tracking** — labels, issue templates, release-readiness issues, and dogfood rollout issues.
+- **Lane 3: Rolling release candidates** — labels, scheduled release checks, and one update-in-place release PR per repo.
 - **Lane 4: StackForge integration** — update future OSS CLI scaffolds so ReleaseBox files are emitted by default.
 - **Lane 5: Dogfood repos** — apply the release standard to `proofdock`, `lockfilelens`, and `failureseed` first.
 
@@ -21,7 +21,7 @@ Future repos should be created through StackForge templates once ReleaseBox is i
 - Run `npm run release:check` before handoff.
 - Run `node bin/releasebox.js check .` before handoff.
 - Do not publish to npm, Homebrew, or GitHub Releases without explicit approval.
-- AI-generated notes/issues are drafts until deterministic checks pass.
+- AI-generated notes are drafts until deterministic checks pass.
 
 ## Dogfood Commit Contract
 
@@ -31,10 +31,10 @@ For each target repo:
 2. Add `releasebox.config.json`.
 3. Add/update local release gate scripts.
 4. Add CI/release dry-run workflows.
-5. Add issue templates and labels.
+5. Add release labels/config where useful.
 6. Add packed package install smoke.
 7. Add docs and release checklist.
-8. Open/update public GitHub issues for remaining blockers.
+8. Track remaining blockers in the release-candidate PR or docs.
 
 ## Integration Notes
 

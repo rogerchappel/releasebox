@@ -1,7 +1,7 @@
 {
   "name": "releasebox",
   "version": "0.1.0",
-  "description": "Issue-driven release readiness tooling for OSS CLIs and apps.",
+  "description": "Continuous release readiness tooling for OSS CLIs and apps.",
   "type": "module",
   "bin": {
     "releasebox": "./bin/releasebox.js"

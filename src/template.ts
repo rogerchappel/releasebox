@@ -14,8 +14,6 @@ export async function installGithubTemplates(options: InstallTemplatesOptions): 
     ['workflows/ci.yml', '.github/workflows/ci.yml'],
     ['workflows/release-dry-run.yml', '.github/workflows/release-dry-run.yml'],
     ['workflows/release.yml', '.github/workflows/release.yml'],
-    ['ISSUE_TEMPLATE/release-readiness.md', '.github/ISSUE_TEMPLATE/release-readiness.md'],
-    ['ISSUE_TEMPLATE/e2e-test-gap.md', '.github/ISSUE_TEMPLATE/e2e-test-gap.md'],
     ['labels.json', '.github/labels.json']
   ];
 

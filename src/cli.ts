@@ -12,7 +12,7 @@ const version = '0.1.0';
 function help(): string {
   return `releasebox ${version}
 
-Issue-driven release readiness tooling for OSS CLIs and apps.
+Continuous release readiness tooling for OSS CLIs and apps.
 
 Usage:
   releasebox init [--type node-cli]

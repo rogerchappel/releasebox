@@ -1,8 +1,8 @@
 # releasebox
 
-Issue-driven release readiness tooling for OSS CLIs and apps.
+Continuous release readiness tooling for OSS CLIs and apps.
 
-`releasebox` helps small OSS projects move toward continuous release without pretending that publishing is safe before the basics work. It gives each repo a repeatable path from GitHub issue tracking to strict CI, package smoke tests, release dry-runs, and reviewed release notes.
+`releasebox` helps small OSS projects move toward continuous release without pretending that publishing is safe before the basics work. It gives each repo a repeatable path from strict CI to package smoke tests, release dry-runs, deterministic release notes, and reviewed tag-based publishing.
 
 ## Why
 
@@ -38,7 +38,7 @@ Create config:
 releasebox init --type node-cli
 ```
 
-Install GitHub workflows and issue templates:
+Install GitHub workflows:
 
 ```sh
 releasebox install-templates
@@ -71,7 +71,6 @@ Automation should be strict where machines are good:
 AI assistance is useful for:
 
 - summarising PRs since the last release
-- drafting release-candidate issues
 - finding test gaps
 - explaining CI failures
 
@@ -85,7 +84,7 @@ Initial targets should be real Roger OSS repos with different shapes:
 - a fresh generated Node CLI
 - a workflow/tooling repo that needs release notes and package proof
 
-Each dogfood PR should be atomic: config, workflows, issue templates, smoke script, package smoke, docs, and fixes as separate commits.
+Each dogfood PR should be atomic: config, workflows, smoke script, package smoke, docs, and fixes as separate commits.
 
 
 ## Project operating files
@@ -95,7 +94,7 @@ ReleaseBox follows the StackForge repo operating style:
 - `docs/TASKS.md` tracks build slices and acceptance criteria.
 - `docs/ORCHESTRATION.md` tracks agent lanes, review gates, and dogfood rollout rules.
 - `.github/dependabot.yml` keeps npm and GitHub Actions dependencies moving.
-- GitHub issue templates make release readiness and e2e gaps public-trackable.
+- Release dry-run workflows make release readiness visible before publishing.
 
 ## First dogfood targets
 
@@ -111,7 +110,7 @@ Per repo, keep the audit trail granular:
 2. local release gate
 3. CI release-readiness workflow
 4. release dry-run workflow
-5. issue templates and labels
+5. labels for release automation
 6. package install smoke
 7. realistic e2e fixture
 8. docs/checklist

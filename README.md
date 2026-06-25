@@ -76,6 +76,13 @@ AI assistance is useful for:
 
 Publishing remains review-gated by default.
 
+## Limitations
+
+`releasebox` checks release readiness signals; it does not publish packages,
+create tags, or replace maintainer review. Generated notes and workflow
+templates should be reviewed against the repo's actual release policy before
+they are used for a public release.
+
 ## Dogfood plan
 
 Initial targets should be real Roger OSS repos with different shapes:

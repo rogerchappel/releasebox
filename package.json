@@ -29,8 +29,11 @@
   },
   "files": [
     "bin/",
+    "docs/",
     "dist/",
     "templates/",
+    "CHANGELOG.md",
+    "SECURITY.md",
     "README.md",
     "LICENSE"
   ],

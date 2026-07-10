@@ -33,6 +33,7 @@
     "dist/",
     "templates/",
     "CHANGELOG.md",
+    "CONTRIBUTING.md",
     "SECURITY.md",
     "README.md",
     "LICENSE"

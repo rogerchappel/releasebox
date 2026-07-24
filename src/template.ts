@@ -1,4 +1,4 @@
-import { cp, mkdir } from 'node:fs/promises';
+import { cp, lstat, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -16,6 +16,24 @@ export async function installGithubTemplates(options: InstallTemplatesOptions): 
     ['workflows/release.yml', '.github/workflows/release.yml'],
     ['labels.json', '.github/labels.json']
   ];
+
+  const conflicts = (
+    await Promise.all(installed.map(async ([, to]) => {
+      try {
+        await lstat(join(options.targetRoot, to));
+        return to;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+          return undefined;
+        }
+        throw error;
+      }
+    }))
+  ).filter((path): path is string => path !== undefined);
+
+  if (conflicts.length > 0) {
+    throw new Error(`refusing to overwrite existing template paths:\n${conflicts.map((path) => `- ${path}`).join('\n')}`);
+  }
 
   const written: string[] = [];
   for (const [from, to] of installed) {

@@ -15,7 +15,7 @@ function help(): string {
 Continuous release readiness tooling for OSS CLIs and apps.
 
 Usage:
-  releasebox init [--type node-cli]
+  releasebox init [--type <node-cli|desktop-app|capacitor-app|library|docs>]
   releasebox check [path]
   releasebox install-templates [path]
   releasebox notes [path]

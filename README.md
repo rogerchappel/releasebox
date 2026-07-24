@@ -44,6 +44,10 @@ Install GitHub workflows:
 releasebox install-templates
 ```
 
+Template installation never overwrites existing files. ReleaseBox checks all four
+destinations before writing anything; if one or more collide, it lists every
+conflicting path and leaves the target unchanged.
+
 Check release readiness:
 
 ```sh

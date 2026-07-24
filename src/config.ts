@@ -14,7 +14,12 @@ export interface ReleaseBoxConfig {
   };
 }
 
-const projectTypes = new Set<ProjectType>(['node-cli', 'desktop-app', 'capacitor-app', 'library', 'docs']);
+export const projectTypes: readonly ProjectType[] = ['node-cli', 'desktop-app', 'capacitor-app', 'library', 'docs'];
+const projectTypeSet = new Set<ProjectType>(projectTypes);
+
+export function isProjectType(input: string): input is ProjectType {
+  return projectTypeSet.has(input as ProjectType);
+}
 
 export function parseReleaseBoxConfig(input: unknown): ReleaseBoxConfig {
   if (!input || typeof input !== 'object') {
@@ -22,12 +27,12 @@ export function parseReleaseBoxConfig(input: unknown): ReleaseBoxConfig {
   }
 
   const record = input as Record<string, unknown>;
-  if (typeof record.projectType !== 'string' || !projectTypes.has(record.projectType as ProjectType)) {
-    throw new Error('projectType must be one of: node-cli, desktop-app, capacitor-app, library, docs');
+  if (typeof record.projectType !== 'string' || !isProjectType(record.projectType)) {
+    throw new Error(`projectType must be one of: ${projectTypes.join(', ')}`);
   }
 
   return {
-    projectType: record.projectType as ProjectType,
+    projectType: record.projectType,
     packageManagers: Array.isArray(record.packageManagers) ? record.packageManagers as ReleaseBoxConfig['packageManagers'] : [],
     smoke: typeof record.smoke === 'object' && record.smoke ? record.smoke as ReleaseBoxConfig['smoke'] : { commands: [] },
     release: typeof record.release === 'object' && record.release ? record.release as ReleaseBoxConfig['release'] : { mode: 'reviewed', createGithubRelease: true }

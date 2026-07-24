@@ -1,6 +1,6 @@
 import { cwd, exit } from 'node:process';
 import { resolve } from 'node:path';
-import { defaultConfig, type ProjectType } from './config.js';
+import { defaultConfig, isProjectType, projectTypes } from './config.js';
 import { writeJson } from './fs.js';
 import { checkReadiness, summarize } from './checks.js';
 import { installGithubTemplates } from './template.js';
@@ -42,7 +42,16 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
 
   const [command] = args;
   if (command === 'init') {
-    const type = (readFlag(args, '--type') ?? 'node-cli') as ProjectType;
+    const typeFlag = readFlag(args, '--type');
+    if (args.includes('--type') && (!typeFlag || typeFlag.startsWith('--'))) {
+      console.error(`--type requires one of: ${projectTypes.join(', ')}`);
+      return 2;
+    }
+    const type = typeFlag ?? 'node-cli';
+    if (!isProjectType(type)) {
+      console.error(`unsupported project type "${type}"; expected one of: ${projectTypes.join(', ')}`);
+      return 2;
+    }
     await writeJson(resolve(cwd(), 'releasebox.config.json'), defaultConfig(type));
     console.log(`created releasebox.config.json for ${type}`);
     return 0;

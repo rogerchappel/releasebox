@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,6 +22,23 @@ test('init accepts every advertised project type', async () => {
     assert.equal(result.status, 0, result.stderr);
     const config = JSON.parse(await readFile(join(root, 'releasebox.config.json'), 'utf8'));
     assert.equal(config.projectType, projectType);
+  }
+});
+
+test('init preserves an existing config without regard to its contents', async () => {
+  for (const contents of [
+    '{"projectType":"docs","marker":"keep-me"}',
+    '{ malformed config',
+  ]) {
+    const root = await mkdtemp(join(tmpdir(), 'releasebox-existing-config-'));
+    const configPath = join(root, 'releasebox.config.json');
+    await writeFile(configPath, contents);
+
+    const result = run(['init', '--type', 'node-cli'], root);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /releasebox\.config\.json already exists/);
+    assert.equal(await readFile(configPath, 'utf8'), contents);
   }
 });
 

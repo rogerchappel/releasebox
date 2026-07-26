@@ -21,6 +21,8 @@ Usage:
   releasebox notes [path]
   releasebox --help
   releasebox --version
+
+Init creates releasebox.config.json and refuses to overwrite an existing file.
 `;
 }
 

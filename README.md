@@ -38,6 +38,11 @@ Create config:
 releasebox init --type node-cli
 ```
 
+Initialization never overwrites `releasebox.config.json`. If that file already
+exists—even if it is malformed—ReleaseBox exits with an error and preserves its
+contents. Remove or rename the existing file only when you deliberately want to
+create a fresh config.
+
 Install GitHub workflows:
 
 ```sh

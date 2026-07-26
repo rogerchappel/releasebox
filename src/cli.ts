@@ -1,7 +1,7 @@
 import { cwd, exit } from 'node:process';
 import { resolve } from 'node:path';
 import { defaultConfig, isProjectType, projectTypes } from './config.js';
-import { writeJson } from './fs.js';
+import { createJson } from './fs.js';
 import { checkReadiness, summarize } from './checks.js';
 import { installGithubTemplates } from './template.js';
 import { recentCommits } from './git.js';
@@ -52,7 +52,15 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
       console.error(`unsupported project type "${type}"; expected one of: ${projectTypes.join(', ')}`);
       return 2;
     }
-    await writeJson(resolve(cwd(), 'releasebox.config.json'), defaultConfig(type));
+    try {
+      await createJson(resolve(cwd(), 'releasebox.config.json'), defaultConfig(type));
+    } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
+        console.error('releasebox.config.json already exists; remove it before initializing');
+        return 1;
+      }
+      throw error;
+    }
     console.log(`created releasebox.config.json for ${type}`);
     return 0;
   }

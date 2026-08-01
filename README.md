@@ -22,6 +22,8 @@ Many OSS tools have code, tests, and READMEs, but still fail the real user path:
 npm install -D releasebox
 ```
 
+The commands below use `npx` to invoke the project-local `releasebox` binary.
+
 For local development in this repo:
 
 ```sh
@@ -35,7 +37,7 @@ node bin/releasebox.js --help
 Create config:
 
 ```sh
-releasebox init --type node-cli
+npx releasebox init --type node-cli
 ```
 
 Initialization never overwrites `releasebox.config.json`. If that file already
@@ -46,7 +48,7 @@ create a fresh config.
 Install GitHub workflows:
 
 ```sh
-releasebox install-templates
+npx releasebox install-templates
 ```
 
 Template installation never overwrites existing files. ReleaseBox checks all four
@@ -56,7 +58,7 @@ conflicting path and leaves the target unchanged.
 Check release readiness:
 
 ```sh
-releasebox check
+npx releasebox check
 ```
 
 ## Project types

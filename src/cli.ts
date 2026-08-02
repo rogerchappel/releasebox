@@ -26,33 +26,36 @@ Init creates releasebox.config.json and refuses to overwrite an existing file.
 `;
 }
 
-function readFlag(args: string[], name: string): string | undefined {
-  const index = args.indexOf(name);
-  return index >= 0 ? args[index + 1] : undefined;
+function usageError(message: string, usage: string): number {
+  console.error(`${message}\nUsage: ${usage}`);
+  return 2;
 }
 
 export async function main(args = process.argv.slice(2)): Promise<number> {
-  if (args.includes('--help') || args.length === 0) {
+  if (args.length === 0 || (args.length === 1 && args[0] === '--help')) {
     console.log(help());
     return 0;
   }
 
-  if (args.includes('--version')) {
+  if (args.length === 1 && args[0] === '--version') {
     console.log(version);
     return 0;
   }
 
   const [command] = args;
   if (command === 'init') {
-    const typeFlag = readFlag(args, '--type');
-    if (args.includes('--type') && (!typeFlag || typeFlag.startsWith('--'))) {
-      console.error(`--type requires one of: ${projectTypes.join(', ')}`);
-      return 2;
+    if (args.length === 2 && args[1] === '--type') {
+      return usageError(`--type requires one of: ${projectTypes.join(', ')}`, 'releasebox init [--type <type>]');
     }
-    const type = typeFlag ?? 'node-cli';
+    if (args.length !== 1 && !(args.length === 3 && args[1] === '--type')) {
+      return usageError('invalid arguments for init', 'releasebox init [--type <type>]');
+    }
+    const type = args[2] ?? 'node-cli';
     if (!isProjectType(type)) {
-      console.error(`unsupported project type "${type}"; expected one of: ${projectTypes.join(', ')}`);
-      return 2;
+      return usageError(
+        `unsupported project type "${type}"; expected one of: ${projectTypes.join(', ')}`,
+        'releasebox init [--type <type>]',
+      );
     }
     try {
       await createJson(resolve(cwd(), 'releasebox.config.json'), defaultConfig(type));
@@ -68,6 +71,9 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
   }
 
   if (command === 'check') {
+    if (args.length > 2 || args[1]?.startsWith('-')) {
+      return usageError('invalid arguments for check', 'releasebox check [path]');
+    }
     const root = resolve(cwd(), args[1] ?? '.');
     const results = await checkReadiness(root);
     console.log(summarize(results));
@@ -75,6 +81,9 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
   }
 
   if (command === 'install-templates') {
+    if (args.length > 2 || args[1]?.startsWith('-')) {
+      return usageError('invalid arguments for install-templates', 'releasebox install-templates [path]');
+    }
     const root = resolve(cwd(), args[1] ?? '.');
     const written = await installGithubTemplates({ targetRoot: root });
     console.log(written.map((path) => `created ${path}`).join('\n'));
@@ -82,6 +91,9 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
   }
 
   if (command === 'notes') {
+    if (args.length > 2 || args[1]?.startsWith('-')) {
+      return usageError('invalid arguments for notes', 'releasebox notes [path]');
+    }
     const root = resolve(cwd(), args[1] ?? '.');
     const result = await recentCommits(root);
     console.log(renderReleaseNotes(result));

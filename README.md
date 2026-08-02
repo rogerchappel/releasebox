@@ -61,6 +61,11 @@ Check release readiness:
 npx releasebox check
 ```
 
+`check`, `notes`, and `install-templates` accept at most one optional path.
+`init` accepts only the optional `--type <type>` pair. Unknown options, extra
+operands, and missing or misplaced option values are rejected with a usage
+diagnostic and exit status 2 before ReleaseBox reads or writes project files.
+
 ## Project types
 
 - `node-cli` — npm package with CLI smoke and packed artifact checks

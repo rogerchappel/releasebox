@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -58,4 +58,44 @@ test('init rejects --type without a value before writing config', async () => {
   assert.equal(result.status, 2);
   assert.match(result.stderr, /--type requires one of/);
   await assert.rejects(readFile(join(root, 'releasebox.config.json'), 'utf8'), { code: 'ENOENT' });
+});
+
+test('init rejects unknown, extra, and misplaced arguments before reading config', async () => {
+  for (const args of [
+    ['init', '--bogus'],
+    ['init', 'node-cli'],
+    ['init', '--type', 'node-cli', 'extra'],
+    ['init', 'extra', '--type', 'node-cli'],
+  ]) {
+    const root = await mkdtemp(join(tmpdir(), 'releasebox-invalid-init-'));
+    const result = run(args, root);
+
+    assert.equal(result.status, 2, `${args.join(' ')}: ${result.stderr}`);
+    assert.match(result.stderr, /Usage: releasebox init/);
+    await assert.rejects(access(join(root, 'releasebox.config.json')), { code: 'ENOENT' });
+  }
+});
+
+test('path commands accept one optional path', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-path-commands-'));
+  await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({ projectType: 'docs' }));
+
+  assert.notEqual(run(['check', root], projectRoot).status, 2);
+  assert.notEqual(run(['notes', root], projectRoot).status, 2);
+  assert.equal(run(['install-templates', root], projectRoot).status, 0);
+});
+
+test('path commands reject options and extra operands before side effects', async () => {
+  for (const command of ['check', 'notes', 'install-templates']) {
+    for (const tail of [['--bogus'], ['one', 'two']]) {
+      const root = await mkdtemp(join(tmpdir(), `releasebox-invalid-${command}-`));
+      const result = run([command, ...tail], root);
+
+      assert.equal(result.status, 2, `${command} ${tail.join(' ')}: ${result.stderr}`);
+      assert.match(result.stderr, new RegExp(`Usage: releasebox ${command}`));
+      if (command === 'install-templates') {
+        await assert.rejects(access(join(root, '.github')), { code: 'ENOENT' });
+      }
+    }
+  }
 });

@@ -99,3 +99,16 @@ test('path commands reject options and extra operands before side effects', asyn
     }
   }
 });
+
+test('check names the missing release workflow when publishing is configured', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-publishing-check-'));
+  await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({
+    projectType: 'docs',
+    release: { createGithubRelease: true, publishNpm: false },
+  }));
+
+  const result = run(['check', root], projectRoot);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /❌ release workflow: \.github\/workflows\/release\.yml/);
+});

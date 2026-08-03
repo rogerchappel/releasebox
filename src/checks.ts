@@ -52,6 +52,14 @@ export async function checkReadiness(root: string): Promise<CheckResult[]> {
     { name: 'dependabot config', ok: await exists(join(root, '.github/dependabot.yml')), detail: '.github/dependabot.yml' }
   ];
 
+  if (config?.release?.createGithubRelease || config?.release?.publishNpm) {
+    base.push({
+      name: 'release workflow',
+      ok: await exists(join(root, '.github/workflows/release.yml')),
+      detail: '.github/workflows/release.yml'
+    });
+  }
+
   if (!config || config.projectType === 'node-cli') {
     return [...base, ...(await checkNodeCliProject(root))];
   }

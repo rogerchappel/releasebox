@@ -61,6 +61,12 @@ Check release readiness:
 npx releasebox check
 ```
 
+When `releasebox.config.json` enables `release.createGithubRelease` or
+`release.publishNpm`, readiness also requires `.github/workflows/release.yml`.
+Configurations with both publishing flags set to `false` do not require that
+workflow. Run `npx releasebox install-templates` to install the standard release
+workflow alongside the other GitHub templates.
+
 `check`, `notes`, and `install-templates` accept at most one optional path.
 `init` accepts only the optional `--type <type>` pair. Unknown options, extra
 operands, and missing or misplaced option values are rejected with a usage

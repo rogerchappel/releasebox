@@ -14,6 +14,15 @@ function run(args, cwd) {
   return spawnSync(process.execPath, [executable, ...args], { cwd, encoding: 'utf8' });
 }
 
+test('check rejects malformed nested config instead of reporting readiness', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-invalid-config-'));
+  await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({ projectType: 'node-cli', release: { publishNpm: null } }));
+  const result = run(['check', root], projectRoot);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /release\.publishNpm must be a boolean/);
+  assert.doesNotMatch(result.stdout, /releasebox config/);
+});
+
 test('init accepts every advertised project type', async () => {
   for (const projectType of projectTypes) {
     const root = await mkdtemp(join(tmpdir(), `releasebox-${projectType}-`));

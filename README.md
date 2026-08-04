@@ -67,6 +67,30 @@ Configurations with both publishing flags set to `false` do not require that
 workflow. Run `npx releasebox install-templates` to install the standard release
 workflow alongside the other GitHub templates.
 
+The configuration schema is:
+
+```json
+{
+  "projectType": "node-cli",
+  "packageManagers": ["npm", "homebrew", "github-release"],
+  "smoke": { "commands": [["npm", "test"], ["npm", "pack", "--dry-run"]] },
+  "release": {
+    "mode": "reviewed",
+    "createGithubRelease": true,
+    "publishNpm": false,
+    "updateHomebrew": false
+  }
+}
+```
+
+`projectType` is required and accepts the values listed below. The other fields
+are optional. Each package manager must be `npm`, `homebrew`, or
+`github-release`; each smoke command must be a non-empty array of non-empty
+string arguments; and release mode must be `manual`, `reviewed`, or
+`tag-gated`. All three publishing flags are booleans. `releasebox check` reports
+a field-specific error and exits nonzero when the file violates this schema;
+it does not report readiness from malformed configuration.
+
 `check`, `notes`, and `install-templates` accept at most one optional path.
 `init` accepts only the optional `--type <type>` pair. Unknown options, extra
 operands, and missing or misplaced option values are rejected with a usage

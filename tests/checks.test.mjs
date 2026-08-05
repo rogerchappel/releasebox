@@ -32,6 +32,66 @@ test('readiness check accepts basic node cli package metadata', async () => {
   assert.equal(results.some((result) => result.name === 'release workflow'), false);
 });
 
+test('readiness check rejects directories in place of required files', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-check-'));
+  await mkdir(join(root, '.github/workflows/ci.yml'), { recursive: true });
+  await mkdir(join(root, '.github/workflows/release-dry-run.yml'));
+  await mkdir(join(root, '.github/dependabot.yml'));
+  await mkdir(join(root, 'docs/TASKS.md'), { recursive: true });
+  await mkdir(join(root, 'docs/ORCHESTRATION.md'));
+  await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({
+    projectType: 'node-cli',
+    release: { createGithubRelease: false, publishNpm: false },
+  }));
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    scripts: { test: 'node --test', build: 'tsc', smoke: 'node cli.js --help' },
+    bin: './cli.js',
+  }));
+
+  const results = await checkReadiness(root);
+  for (const name of ['ci workflow', 'release dry run workflow', 'task breakdown', 'orchestration plan', 'dependabot config']) {
+    assert.equal(results.find((result) => result.name === name)?.ok, false, name);
+  }
+});
+
+test('readiness check rejects empty required files', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-check-'));
+  await mkdir(join(root, '.github/workflows'), { recursive: true });
+  await mkdir(join(root, 'docs'), { recursive: true });
+  await writeFile(join(root, '.github/workflows/ci.yml'), '');
+  await writeFile(join(root, '.github/workflows/release-dry-run.yml'), '');
+  await writeFile(join(root, '.github/dependabot.yml'), '');
+  await writeFile(join(root, 'docs/TASKS.md'), '');
+  await writeFile(join(root, 'docs/ORCHESTRATION.md'), '');
+  await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({
+    projectType: 'node-cli',
+    release: { createGithubRelease: false, publishNpm: false },
+  }));
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    scripts: { test: 'node --test', build: 'tsc', smoke: 'node cli.js --help' },
+    bin: './cli.js',
+  }));
+
+  const results = await checkReadiness(root);
+  assert.equal(results.filter((result) => result.detail.endsWith('.yml') || result.detail.endsWith('.md')).every((result) => !result.ok), true);
+});
+
+for (const invalidMetadata of [
+  { scripts: { test: '', build: '  ', smoke: '\t' }, bin: {} },
+  { scripts: { test: '', build: '', smoke: '' }, bin: '' },
+  { scripts: { test: '', build: '', smoke: '' }, bin: { releasebox: '' } },
+]) {
+  test(`readiness check rejects empty commands and bin metadata: ${JSON.stringify(invalidMetadata.bin)}`, async () => {
+    const root = await mkdtemp(join(tmpdir(), 'releasebox-check-'));
+    await writeFile(join(root, 'package.json'), JSON.stringify(invalidMetadata));
+
+    const results = await checkReadiness(root);
+    for (const name of ['npm test script', 'build script', 'smoke script', 'bin entry']) {
+      assert.equal(results.find((result) => result.name === name)?.ok, false, name);
+    }
+  });
+}
+
 for (const release of [
   { createGithubRelease: true, publishNpm: false },
   { createGithubRelease: false, publishNpm: true },

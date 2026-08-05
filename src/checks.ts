@@ -1,4 +1,4 @@
-import { access, readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseReleaseBoxConfig, type ReleaseBoxConfig } from './config.js';
 import { readJson } from './fs.js';
@@ -9,35 +9,45 @@ export interface CheckResult {
   detail: string;
 }
 
-async function exists(path: string): Promise<boolean> {
+async function isNonEmptyFile(path: string): Promise<boolean> {
   try {
-    await access(path);
-    return true;
+    const metadata = await stat(path);
+    return metadata.isFile() && metadata.size > 0;
   } catch {
     return false;
   }
 }
 
+function isNonEmptyCommand(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function hasExecutableBin(pkgBin: unknown): boolean {
+  if (isNonEmptyCommand(pkgBin)) return true;
+  if (!pkgBin || typeof pkgBin !== 'object' || Array.isArray(pkgBin)) return false;
+  return Object.values(pkgBin).some(isNonEmptyCommand);
+}
+
 export async function loadProjectConfig(root: string): Promise<ReleaseBoxConfig | null> {
   const path = join(root, 'releasebox.config.json');
-  if (!(await exists(path))) return null;
+  if (!(await isNonEmptyFile(path))) return null;
   return parseReleaseBoxConfig(await readJson(path));
 }
 
 export async function checkNodeCliProject(root: string): Promise<CheckResult[]> {
   const packagePath = join(root, 'package.json');
-  if (!(await exists(packagePath))) {
-    return [{ name: 'package.json', ok: false, detail: 'missing package.json' }];
+  if (!(await isNonEmptyFile(packagePath))) {
+    return [{ name: 'package.json', ok: false, detail: 'missing or empty regular file: package.json' }];
   }
 
   const pkg = JSON.parse(await readFile(packagePath, 'utf8')) as Record<string, unknown>;
   const scripts = typeof pkg.scripts === 'object' && pkg.scripts ? pkg.scripts as Record<string, unknown> : {};
 
   return [
-    { name: 'npm test script', ok: typeof scripts.test === 'string', detail: scripts.test ? String(scripts.test) : 'missing scripts.test' },
-    { name: 'build script', ok: typeof scripts.build === 'string', detail: scripts.build ? String(scripts.build) : 'missing scripts.build' },
-    { name: 'smoke script', ok: typeof scripts.smoke === 'string', detail: scripts.smoke ? String(scripts.smoke) : 'missing scripts.smoke' },
-    { name: 'bin entry', ok: typeof pkg.bin === 'object' || typeof pkg.bin === 'string', detail: pkg.bin ? JSON.stringify(pkg.bin) : 'missing package bin' }
+    { name: 'npm test script', ok: isNonEmptyCommand(scripts.test), detail: isNonEmptyCommand(scripts.test) ? scripts.test : 'missing or empty scripts.test' },
+    { name: 'build script', ok: isNonEmptyCommand(scripts.build), detail: isNonEmptyCommand(scripts.build) ? scripts.build : 'missing or empty scripts.build' },
+    { name: 'smoke script', ok: isNonEmptyCommand(scripts.smoke), detail: isNonEmptyCommand(scripts.smoke) ? scripts.smoke : 'missing or empty scripts.smoke' },
+    { name: 'bin entry', ok: hasExecutableBin(pkg.bin), detail: hasExecutableBin(pkg.bin) ? JSON.stringify(pkg.bin) : 'missing or empty package bin executable path' }
   ];
 }
 
@@ -45,17 +55,17 @@ export async function checkReadiness(root: string): Promise<CheckResult[]> {
   const config = await loadProjectConfig(root);
   const base: CheckResult[] = [
     { name: 'releasebox config', ok: Boolean(config), detail: config ? config.projectType : 'missing releasebox.config.json' },
-    { name: 'ci workflow', ok: await exists(join(root, '.github/workflows/ci.yml')), detail: '.github/workflows/ci.yml' },
-    { name: 'release dry run workflow', ok: await exists(join(root, '.github/workflows/release-dry-run.yml')), detail: '.github/workflows/release-dry-run.yml' },
-    { name: 'task breakdown', ok: await exists(join(root, 'docs/TASKS.md')), detail: 'docs/TASKS.md' },
-    { name: 'orchestration plan', ok: await exists(join(root, 'docs/ORCHESTRATION.md')), detail: 'docs/ORCHESTRATION.md' },
-    { name: 'dependabot config', ok: await exists(join(root, '.github/dependabot.yml')), detail: '.github/dependabot.yml' }
+    { name: 'ci workflow', ok: await isNonEmptyFile(join(root, '.github/workflows/ci.yml')), detail: '.github/workflows/ci.yml' },
+    { name: 'release dry run workflow', ok: await isNonEmptyFile(join(root, '.github/workflows/release-dry-run.yml')), detail: '.github/workflows/release-dry-run.yml' },
+    { name: 'task breakdown', ok: await isNonEmptyFile(join(root, 'docs/TASKS.md')), detail: 'docs/TASKS.md' },
+    { name: 'orchestration plan', ok: await isNonEmptyFile(join(root, 'docs/ORCHESTRATION.md')), detail: 'docs/ORCHESTRATION.md' },
+    { name: 'dependabot config', ok: await isNonEmptyFile(join(root, '.github/dependabot.yml')), detail: '.github/dependabot.yml' }
   ];
 
   if (config?.release?.createGithubRelease || config?.release?.publishNpm) {
     base.push({
       name: 'release workflow',
-      ok: await exists(join(root, '.github/workflows/release.yml')),
+      ok: await isNonEmptyFile(join(root, '.github/workflows/release.yml')),
       detail: '.github/workflows/release.yml'
     });
   }

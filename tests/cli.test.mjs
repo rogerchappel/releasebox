@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { access, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -120,4 +120,42 @@ test('check names the missing release workflow when publishing is configured', a
 
   assert.equal(result.status, 1);
   assert.match(result.stdout, /❌ release workflow: \.github\/workflows\/release\.yml/);
+});
+
+test('check exits nonzero with field-specific diagnostics for unusable readiness inputs', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-unusable-inputs-'));
+  for (const path of [
+    '.github/workflows/ci.yml',
+    '.github/workflows/release-dry-run.yml',
+    '.github/dependabot.yml',
+    'docs/TASKS.md',
+    'docs/ORCHESTRATION.md',
+  ]) {
+    await mkdir(join(root, path), { recursive: true });
+  }
+  await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({
+    projectType: 'node-cli',
+    release: { createGithubRelease: false, publishNpm: false },
+  }));
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    scripts: { test: '', build: '', smoke: '' },
+    bin: {},
+  }));
+
+  const result = run(['check', root], projectRoot);
+
+  assert.equal(result.status, 1);
+  for (const diagnostic of [
+    '❌ ci workflow: .github/workflows/ci.yml',
+    '❌ release dry run workflow: .github/workflows/release-dry-run.yml',
+    '❌ task breakdown: docs/TASKS.md',
+    '❌ orchestration plan: docs/ORCHESTRATION.md',
+    '❌ dependabot config: .github/dependabot.yml',
+    '❌ npm test script: missing or empty scripts.test',
+    '❌ build script: missing or empty scripts.build',
+    '❌ smoke script: missing or empty scripts.smoke',
+    '❌ bin entry: missing or empty package bin executable path',
+  ]) {
+    assert.match(result.stdout, new RegExp(diagnostic.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
 });

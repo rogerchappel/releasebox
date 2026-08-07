@@ -53,14 +53,20 @@ export async function checkNodeCliProject(root: string): Promise<CheckResult[]> 
 
 export async function checkReadiness(root: string): Promise<CheckResult[]> {
   const config = await loadProjectConfig(root);
+  const usesNpm = config?.projectType === 'node-cli' || config?.packageManagers?.includes('npm') || config?.release?.publishNpm === true;
   const base: CheckResult[] = [
     { name: 'releasebox config', ok: Boolean(config), detail: config ? config.projectType : 'missing releasebox.config.json' },
-    { name: 'ci workflow', ok: await isNonEmptyFile(join(root, '.github/workflows/ci.yml')), detail: '.github/workflows/ci.yml' },
-    { name: 'release dry run workflow', ok: await isNonEmptyFile(join(root, '.github/workflows/release-dry-run.yml')), detail: '.github/workflows/release-dry-run.yml' },
     { name: 'task breakdown', ok: await isNonEmptyFile(join(root, 'docs/TASKS.md')), detail: 'docs/TASKS.md' },
     { name: 'orchestration plan', ok: await isNonEmptyFile(join(root, 'docs/ORCHESTRATION.md')), detail: 'docs/ORCHESTRATION.md' },
     { name: 'dependabot config', ok: await isNonEmptyFile(join(root, '.github/dependabot.yml')), detail: '.github/dependabot.yml' }
   ];
+
+  if (!config || usesNpm) {
+    base.splice(1, 0,
+      { name: 'ci workflow', ok: await isNonEmptyFile(join(root, '.github/workflows/ci.yml')), detail: '.github/workflows/ci.yml' },
+      { name: 'release dry run workflow', ok: await isNonEmptyFile(join(root, '.github/workflows/release-dry-run.yml')), detail: '.github/workflows/release-dry-run.yml' },
+    );
+  }
 
   if (config?.release?.createGithubRelease || config?.release?.publishNpm) {
     base.push({

@@ -94,6 +94,26 @@ test('path commands accept one optional path', async () => {
   assert.equal(run(['install-templates', root], projectRoot).status, 0);
 });
 
+test('generated projects install only executable workflow command sets', async () => {
+  for (const projectType of projectTypes) {
+    const root = await mkdtemp(join(tmpdir(), `releasebox-generated-${projectType}-`));
+    assert.equal(run(['init', '--type', projectType], root).status, 0);
+    const installed = run(['install-templates'], root);
+    assert.equal(installed.status, 0, installed.stderr);
+
+    const workflowRoot = join(root, '.github/workflows');
+    if (projectType === 'node-cli') {
+      for (const name of ['ci.yml', 'release-dry-run.yml', 'release.yml']) {
+        assert.match(await readFile(join(workflowRoot, name), 'utf8'), /npm ci/);
+      }
+    } else {
+      await assert.rejects(access(join(workflowRoot, 'ci.yml')), { code: 'ENOENT' });
+      await assert.rejects(access(join(workflowRoot, 'release-dry-run.yml')), { code: 'ENOENT' });
+      assert.doesNotMatch(await readFile(join(workflowRoot, 'release.yml'), 'utf8'), /npm /);
+    }
+  }
+});
+
 test('path commands reject options and extra operands before side effects', async () => {
   for (const command of ['check', 'notes', 'install-templates']) {
     for (const tail of [['--bogus'], ['one', 'two']]) {

@@ -51,9 +51,16 @@ Install GitHub workflows:
 npx releasebox install-templates
 ```
 
-Template installation never overwrites existing files. ReleaseBox checks all four
-destinations before writing anything; if one or more collide, it lists every
+Template installation reads `releasebox.config.json` and never overwrites existing
+files. ReleaseBox checks every selected destination before writing anything; if one or more collide, it lists every
 conflicting path and leaves the target unchanged.
+
+Projects configured with the `npm` package manager (or `release.publishNpm`) get
+the npm CI, release dry-run, and release workflows. Other project types omit the
+npm-only CI and dry-run workflows. When `release.createGithubRelease` is enabled,
+they instead get a release workflow that uses Git and GitHub CLI only; when both
+release flags are disabled, no release workflow is installed. Labels are installed
+for every project type.
 
 Check release readiness:
 
@@ -64,8 +71,8 @@ npx releasebox check
 When `releasebox.config.json` enables `release.createGithubRelease` or
 `release.publishNpm`, readiness also requires `.github/workflows/release.yml`.
 Configurations with both publishing flags set to `false` do not require that
-workflow. Run `npx releasebox install-templates` to install the standard release
-workflow alongside the other GitHub templates.
+workflow. CI and release dry-run workflows are required only when npm is configured,
+matching the templates selected by `install-templates`.
 
 The configuration schema is:
 

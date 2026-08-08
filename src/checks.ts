@@ -22,10 +22,10 @@ function isNonEmptyCommand(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
-function hasExecutableBin(pkgBin: unknown): boolean {
-  if (isNonEmptyCommand(pkgBin)) return true;
-  if (!pkgBin || typeof pkgBin !== 'object' || Array.isArray(pkgBin)) return false;
-  return Object.values(pkgBin).some(isNonEmptyCommand);
+function binTargets(pkgBin: unknown): string[] {
+  if (isNonEmptyCommand(pkgBin)) return [pkgBin];
+  if (!pkgBin || typeof pkgBin !== 'object' || Array.isArray(pkgBin)) return [];
+  return Object.values(pkgBin).filter(isNonEmptyCommand);
 }
 
 export async function loadProjectConfig(root: string): Promise<ReleaseBoxConfig | null> {
@@ -42,12 +42,22 @@ export async function checkNodeCliProject(root: string): Promise<CheckResult[]> 
 
   const pkg = JSON.parse(await readFile(packagePath, 'utf8')) as Record<string, unknown>;
   const scripts = typeof pkg.scripts === 'object' && pkg.scripts ? pkg.scripts as Record<string, unknown> : {};
+  const declaredBinTargets = binTargets(pkg.bin);
+  const usableBinTargets = await Promise.all(
+    declaredBinTargets.map(async (target) => ({ target, usable: await isNonEmptyFile(join(root, target)) })),
+  );
+  const executableBin = usableBinTargets.find(({ usable }) => usable);
+  const binDetail = executableBin
+    ? JSON.stringify(pkg.bin)
+    : declaredBinTargets.length > 0
+      ? `missing or empty regular file for package bin target(s): ${declaredBinTargets.join(', ')}`
+      : 'missing or empty package bin executable path';
 
   return [
     { name: 'npm test script', ok: isNonEmptyCommand(scripts.test), detail: isNonEmptyCommand(scripts.test) ? scripts.test : 'missing or empty scripts.test' },
     { name: 'build script', ok: isNonEmptyCommand(scripts.build), detail: isNonEmptyCommand(scripts.build) ? scripts.build : 'missing or empty scripts.build' },
     { name: 'smoke script', ok: isNonEmptyCommand(scripts.smoke), detail: isNonEmptyCommand(scripts.smoke) ? scripts.smoke : 'missing or empty scripts.smoke' },
-    { name: 'bin entry', ok: hasExecutableBin(pkg.bin), detail: hasExecutableBin(pkg.bin) ? JSON.stringify(pkg.bin) : 'missing or empty package bin executable path' }
+    { name: 'bin entry', ok: Boolean(executableBin), detail: binDetail }
   ];
 }
 

@@ -73,6 +73,8 @@ When `releasebox.config.json` enables `release.createGithubRelease` or
 Configurations with both publishing flags set to `false` do not require that
 workflow. CI and release dry-run workflows are required only when npm is configured,
 matching the templates selected by `install-templates`.
+For `node-cli` projects, the package `bin` field must declare at least one target
+that resolves relative to `package.json` to an existing, non-empty regular file.
 
 The configuration schema is:
 

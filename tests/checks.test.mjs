@@ -26,10 +26,41 @@ test('readiness check accepts basic node cli package metadata', async () => {
     release: { createGithubRelease: false, publishNpm: false },
   }));
   await writeFile(join(root, 'package.json'), JSON.stringify({ scripts: { test: 'node --test', build: 'tsc', smoke: 'node cli.js --help' }, bin: './cli.js' }));
+  await writeFile(join(root, 'cli.js'), '#!/usr/bin/env node\n');
 
   const results = await checkReadiness(root);
   assert.equal(results.every((result) => result.ok), true);
   assert.equal(results.some((result) => result.name === 'release workflow'), false);
+});
+
+for (const bin of ['./cli.js', { releasebox: './cli.js' }]) {
+  test(`readiness check accepts an existing non-empty package bin target: ${JSON.stringify(bin)}`, async () => {
+    const root = await mkdtemp(join(tmpdir(), 'releasebox-check-'));
+    await writeFile(join(root, 'package.json'), JSON.stringify({ bin }));
+    await writeFile(join(root, 'cli.js'), '#!/usr/bin/env node\n');
+
+    const results = await checkReadiness(root);
+    assert.equal(results.find((result) => result.name === 'bin entry')?.ok, true);
+  });
+}
+
+test('readiness check rejects and names a missing package bin target', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-check-'));
+  await writeFile(join(root, 'package.json'), JSON.stringify({ bin: { sample: './missing-cli.js' } }));
+
+  const results = await checkReadiness(root);
+  const binResult = results.find((result) => result.name === 'bin entry');
+  assert.equal(binResult?.ok, false);
+  assert.match(binResult?.detail ?? '', /\.\/missing-cli\.js/);
+});
+
+test('readiness check rejects an empty package bin target', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-check-'));
+  await writeFile(join(root, 'package.json'), JSON.stringify({ bin: './cli.js' }));
+  await writeFile(join(root, 'cli.js'), '');
+
+  const results = await checkReadiness(root);
+  assert.equal(results.find((result) => result.name === 'bin entry')?.ok, false);
 });
 
 test('readiness check rejects directories in place of required files', async () => {

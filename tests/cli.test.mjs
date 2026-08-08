@@ -142,6 +142,23 @@ test('check names the missing release workflow when publishing is configured', a
   assert.match(result.stdout, /❌ release workflow: \.github\/workflows\/release\.yml/);
 });
 
+test('check exits nonzero and names a missing package bin target', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-missing-bin-'));
+  await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({
+    projectType: 'node-cli',
+    release: { createGithubRelease: false, publishNpm: false },
+  }));
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    scripts: { test: 'node --test', build: 'tsc', smoke: 'node cli.js --help' },
+    bin: { sample: './missing-cli.js' },
+  }));
+
+  const result = run(['check', root], projectRoot);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /❌ bin entry: .*\.\/missing-cli\.js/);
+});
+
 test('check exits nonzero with field-specific diagnostics for unusable readiness inputs', async () => {
   const root = await mkdtemp(join(tmpdir(), 'releasebox-unusable-inputs-'));
   for (const path of [

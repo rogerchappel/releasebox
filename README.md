@@ -19,10 +19,13 @@ Many OSS tools have code, tests, and READMEs, but still fail the real user path:
 ## Install
 
 ```sh
-npm install -D releasebox
+npm install -D https://github.com/rogerchappel/releasebox/releases/download/v0.1.0/releasebox-0.1.0.tgz
 ```
 
-The commands below use `npx` to invoke the project-local `releasebox` binary.
+ReleaseBox is currently distributed through GitHub Releases, not the npm
+registry. The command above installs the reviewed v0.1.0 release artifact. The
+commands below use `npx --no-install` to invoke that project-local binary
+without falling back to a registry download.
 
 For local development in this repo:
 
@@ -37,7 +40,7 @@ node bin/releasebox.js --help
 Create config:
 
 ```sh
-npx releasebox init --type node-cli
+npx --no-install releasebox init --type node-cli
 ```
 
 Initialization never overwrites `releasebox.config.json`. If that file already
@@ -48,7 +51,7 @@ create a fresh config.
 Install GitHub workflows:
 
 ```sh
-npx releasebox install-templates
+npx --no-install releasebox install-templates
 ```
 
 Template installation reads `releasebox.config.json` and never overwrites existing
@@ -65,7 +68,7 @@ for every project type.
 Check release readiness:
 
 ```sh
-npx releasebox check
+npx --no-install releasebox check
 ```
 
 When `releasebox.config.json` enables `release.createGithubRelease` or

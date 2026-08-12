@@ -1,7 +1,6 @@
 {
   "projectType": "node-cli",
   "packageManagers": [
-    "npm",
     "github-release"
   ],
   "smoke": {

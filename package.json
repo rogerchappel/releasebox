@@ -12,8 +12,8 @@
     "lint": "tsc -p tsconfig.json --noEmit",
     "prepack": "npm run build",
     "smoke": "npm run build && node bin/releasebox.js --help && node bin/releasebox.js --version",
-    "package:smoke": "npm run build && node scripts/package-smoke.mjs .",
-    "artifact:smoke": "node scripts/package-smoke.mjs https://github.com/rogerchappel/releasebox/releases/download/v0.1.0/releasebox-0.1.0.tgz",
+    "package:smoke": "npm run build && node scripts/package-smoke.mjs . node-cli,desktop-app,capacitor-app,library,docs type-aware",
+    "artifact:smoke": "node scripts/package-smoke.mjs https://github.com/rogerchappel/releasebox/releases/download/v0.1.0/releasebox-0.1.0.tgz node-cli npm-only",
     "distribution:check": "node scripts/verify-distribution.mjs",
     "release:check": "npm run lint && npm test && npm run smoke && npm run package:smoke && npm run artifact:smoke && npm run distribution:check && npm pack --dry-run",
     "release:notes": "node bin/releasebox.js notes"

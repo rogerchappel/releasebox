@@ -27,6 +27,11 @@ registry. The command above installs the reviewed v0.1.0 release artifact. The
 commands below use `npx --no-install` to invoke that project-local binary
 without falling back to a registry download.
 
+The v0.1.0 artifact supports `node-cli` initialization and installs its npm CI,
+release dry-run, and release workflows. The additional project types and
+type-aware workflow selection documented below are available on the current
+development branch and are not part of the downloadable v0.1.0 artifact.
+
 For local development in this repo:
 
 ```sh
@@ -109,6 +114,9 @@ operands, and missing or misplaced option values are rejected with a usage
 diagnostic and exit status 2 before ReleaseBox reads or writes project files.
 
 ## Project types
+
+Current development builds accept all five project types. The reviewed v0.1.0
+artifact supports only the documented `node-cli` interface above.
 
 - `node-cli` — npm package with CLI smoke and packed artifact checks
 - `desktop-app` — packaged desktop release profile

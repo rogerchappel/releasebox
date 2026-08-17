@@ -159,6 +159,26 @@ test('check exits nonzero and names a missing package bin target', async () => {
   assert.match(result.stdout, /❌ bin entry: .*\.\/missing-cli\.js/);
 });
 
+test('check exits nonzero and names every invalid target in a mixed multi-bin package', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-mixed-bin-'));
+  await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({
+    projectType: 'node-cli',
+    release: { createGithubRelease: false, publishNpm: false },
+  }));
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    scripts: { test: 'node --test', build: 'tsc', smoke: 'node good.js --help' },
+    bin: { good: './good.js', missing: './missing.js', empty: './empty.js' },
+  }));
+  await writeFile(join(root, 'good.js'), '#!/usr/bin/env node\n');
+  await writeFile(join(root, 'empty.js'), '');
+
+  const result = run(['check', root], projectRoot);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /missing: missing file \.\/missing\.js/);
+  assert.match(result.stdout, /empty: empty file \.\/empty\.js/);
+});
+
 test('check exits nonzero with field-specific diagnostics for unusable readiness inputs', async () => {
   const root = await mkdtemp(join(tmpdir(), 'releasebox-unusable-inputs-'));
   for (const path of [

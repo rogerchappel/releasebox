@@ -22,10 +22,31 @@ function isNonEmptyCommand(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
-function binTargets(pkgBin: unknown): string[] {
-  if (isNonEmptyCommand(pkgBin)) return [pkgBin];
+interface BinTarget {
+  name: string;
+  target: unknown;
+}
+
+function binTargets(pkgBin: unknown): BinTarget[] {
+  if (typeof pkgBin === 'string') return [{ name: 'bin', target: pkgBin }];
   if (!pkgBin || typeof pkgBin !== 'object' || Array.isArray(pkgBin)) return [];
-  return Object.values(pkgBin).filter(isNonEmptyCommand);
+  return Object.entries(pkgBin).map(([name, target]) => ({ name, target }));
+}
+
+async function checkBinTarget(root: string, entry: BinTarget): Promise<string | null> {
+  if (!isNonEmptyCommand(entry.target)) {
+    return `${entry.name}: empty or non-string executable path`;
+  }
+
+  const target = entry.target;
+  try {
+    const metadata = await stat(join(root, target));
+    if (!metadata.isFile()) return `${entry.name}: non-regular file ${target}`;
+    if (metadata.size === 0) return `${entry.name}: empty file ${target}`;
+    return null;
+  } catch {
+    return `${entry.name}: missing file ${target}`;
+  }
 }
 
 export async function loadProjectConfig(root: string): Promise<ReleaseBoxConfig | null> {
@@ -43,21 +64,20 @@ export async function checkNodeCliProject(root: string): Promise<CheckResult[]> 
   const pkg = JSON.parse(await readFile(packagePath, 'utf8')) as Record<string, unknown>;
   const scripts = typeof pkg.scripts === 'object' && pkg.scripts ? pkg.scripts as Record<string, unknown> : {};
   const declaredBinTargets = binTargets(pkg.bin);
-  const usableBinTargets = await Promise.all(
-    declaredBinTargets.map(async (target) => ({ target, usable: await isNonEmptyFile(join(root, target)) })),
-  );
-  const executableBin = usableBinTargets.find(({ usable }) => usable);
-  const binDetail = executableBin
+  const binFailures = await Promise.all(declaredBinTargets.map((entry) => checkBinTarget(root, entry)));
+  const failedBinTargets = binFailures.filter((failure): failure is string => failure !== null);
+  const binOk = declaredBinTargets.length > 0 && failedBinTargets.length === 0;
+  const binDetail = binOk
     ? JSON.stringify(pkg.bin)
-    : declaredBinTargets.length > 0
-      ? `missing or empty regular file for package bin target(s): ${declaredBinTargets.join(', ')}`
+    : failedBinTargets.length > 0
+      ? failedBinTargets.join('; ')
       : 'missing or empty package bin executable path';
 
   return [
     { name: 'npm test script', ok: isNonEmptyCommand(scripts.test), detail: isNonEmptyCommand(scripts.test) ? scripts.test : 'missing or empty scripts.test' },
     { name: 'build script', ok: isNonEmptyCommand(scripts.build), detail: isNonEmptyCommand(scripts.build) ? scripts.build : 'missing or empty scripts.build' },
     { name: 'smoke script', ok: isNonEmptyCommand(scripts.smoke), detail: isNonEmptyCommand(scripts.smoke) ? scripts.smoke : 'missing or empty scripts.smoke' },
-    { name: 'bin entry', ok: Boolean(executableBin), detail: binDetail }
+    { name: 'bin entry', ok: binOk, detail: binDetail }
   ];
 }
 

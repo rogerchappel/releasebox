@@ -72,6 +72,10 @@ for every project type.
 
 Check release readiness:
 
+For Node CLI packages, readiness validates every declared `package.json` `bin`
+target. A multi-bin package passes only when each target is a non-empty regular
+file; diagnostics name every missing, empty, or non-regular target.
+
 ```sh
 npx --no-install releasebox check
 ```

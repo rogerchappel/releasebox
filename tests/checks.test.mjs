@@ -63,6 +63,41 @@ test('readiness check rejects an empty package bin target', async () => {
   assert.equal(results.find((result) => result.name === 'bin entry')?.ok, false);
 });
 
+test('readiness check reports every unusable target in a mixed multi-bin package', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-check-'));
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    bin: {
+      good: './good.js',
+      missing: './missing.js',
+      empty: './empty.js',
+      directory: './bin-dir',
+    },
+  }));
+  await writeFile(join(root, 'good.js'), '#!/usr/bin/env node\n');
+  await writeFile(join(root, 'empty.js'), '');
+  await mkdir(join(root, 'bin-dir'));
+
+  const results = await checkReadiness(root);
+  const binResult = results.find((result) => result.name === 'bin entry');
+  assert.equal(binResult?.ok, false);
+  assert.match(binResult?.detail ?? '', /missing: missing file \.\/missing\.js/);
+  assert.match(binResult?.detail ?? '', /empty: empty file \.\/empty\.js/);
+  assert.match(binResult?.detail ?? '', /directory: non-regular file \.\/bin-dir/);
+  assert.doesNotMatch(binResult?.detail ?? '', /good/);
+});
+
+test('readiness check accepts a valid multi-bin package', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-check-'));
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    bin: { alpha: './alpha.js', beta: './beta.js' },
+  }));
+  await writeFile(join(root, 'alpha.js'), '#!/usr/bin/env node\n');
+  await writeFile(join(root, 'beta.js'), '#!/usr/bin/env node\n');
+
+  const results = await checkReadiness(root);
+  assert.equal(results.find((result) => result.name === 'bin entry')?.ok, true);
+});
+
 test('readiness check rejects directories in place of required files', async () => {
   const root = await mkdtemp(join(tmpdir(), 'releasebox-check-'));
   await mkdir(join(root, '.github/workflows/ci.yml'), { recursive: true });

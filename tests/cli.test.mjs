@@ -23,6 +23,15 @@ test('check rejects malformed nested config instead of reporting readiness', asy
   assert.doesNotMatch(result.stdout, /releasebox config/);
 });
 
+test('check reports the precise path for an unknown config key', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'releasebox-unknown-config-key-'));
+  await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({ projectType: 'node-cli', release: { publishNmp: true } }));
+  const result = run(['check', root], projectRoot);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /unknown config key: release\.publishNmp/);
+  assert.doesNotMatch(result.stdout, /releasebox config/);
+});
+
 test('init accepts every advertised project type', async () => {
   for (const projectType of projectTypes) {
     const root = await mkdtemp(join(tmpdir(), `releasebox-${projectType}-`));

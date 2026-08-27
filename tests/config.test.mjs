@@ -13,6 +13,12 @@ test('config parser rejects unknown project types', () => {
   assert.throws(() => parseReleaseBoxConfig({ projectType: 'banana' }), /projectType/);
 });
 
+test('config parser rejects unknown keys with their full field path', () => {
+  assert.throws(() => parseReleaseBoxConfig({ projectType: 'node-cli', projectTypo: 'library' }), /unknown config key: projectTypo/);
+  assert.throws(() => parseReleaseBoxConfig({ projectType: 'node-cli', smoke: { command: [['npm', 'test']] } }), /unknown config key: smoke\.command/);
+  assert.throws(() => parseReleaseBoxConfig({ projectType: 'node-cli', release: { publishNmp: true } }), /unknown config key: release\.publishNmp/);
+});
+
 test('config parser preserves valid partial and explicit configuration', () => {
   assert.deepEqual(parseReleaseBoxConfig({ projectType: 'library' }), { projectType: 'library', packageManagers: [], smoke: { commands: [] }, release: { mode: 'reviewed', createGithubRelease: true } });
   assert.deepEqual(parseReleaseBoxConfig({ projectType: 'node-cli', packageManagers: ['npm'], smoke: { commands: [['npm', 'test']] }, release: { mode: 'manual', publishNpm: false } }).smoke.commands, [['npm', 'test']]);

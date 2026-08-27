@@ -110,7 +110,9 @@ are optional. Each package manager must be `npm`, `homebrew`, or
 string arguments; and release mode must be `manual`, `reviewed`, or
 `tag-gated`. All three publishing flags are booleans. `releasebox check` reports
 a field-specific error and exits nonzero when the file violates this schema;
-it does not report readiness from malformed configuration.
+it does not report readiness from malformed configuration. Keys are strict at
+the root and inside `smoke` and `release`, so misspellings such as
+`release.publishNmp` are reported instead of silently ignored.
 
 `check`, `notes`, and `install-templates` accept at most one optional path.
 `init` accepts only the optional `--type <type>` pair. Unknown options, extra

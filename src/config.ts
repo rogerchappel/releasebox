@@ -20,6 +20,14 @@ const packageManagers = ['npm', 'homebrew', 'github-release'] as const;
 const packageManagerSet = new Set<string>(packageManagers);
 const releaseModes = ['manual', 'reviewed', 'tag-gated'] as const;
 const releaseModeSet = new Set<string>(releaseModes);
+const rootKeys = new Set(['projectType', 'packageManagers', 'smoke', 'release']);
+const smokeKeys = new Set(['commands']);
+const releaseKeys = new Set(['mode', 'createGithubRelease', 'publishNpm', 'updateHomebrew']);
+
+function rejectUnknownKeys(record: Record<string, unknown>, allowed: Set<string>, prefix = ''): void {
+  const unknown = Object.keys(record).find((key) => !allowed.has(key));
+  if (unknown) throw new Error(`unknown config key: ${prefix}${unknown}`);
+}
 
 export function isProjectType(input: string): input is ProjectType {
   return projectTypeSet.has(input as ProjectType);
@@ -31,6 +39,7 @@ export function parseReleaseBoxConfig(input: unknown): ReleaseBoxConfig {
   }
 
   const record = input as Record<string, unknown>;
+  rejectUnknownKeys(record, rootKeys);
   if (typeof record.projectType !== 'string' || !isProjectType(record.projectType)) {
     throw new Error(`projectType must be one of: ${projectTypes.join(', ')}`);
   }
@@ -42,6 +51,7 @@ export function parseReleaseBoxConfig(input: unknown): ReleaseBoxConfig {
 
   if (record.smoke !== undefined && (!record.smoke || typeof record.smoke !== 'object' || Array.isArray(record.smoke))) throw new Error('smoke must be an object');
   const smoke = record.smoke as Record<string, unknown> | undefined;
+  if (smoke) rejectUnknownKeys(smoke, smokeKeys, 'smoke.');
   if (smoke?.commands !== undefined && !Array.isArray(smoke.commands)) throw new Error('smoke.commands must be an array');
   if (Array.isArray(smoke?.commands)) smoke.commands.forEach((command, commandIndex) => {
     if (!Array.isArray(command) || command.length === 0) throw new Error(`smoke.commands[${commandIndex}] must be a non-empty argv array`);
@@ -52,6 +62,7 @@ export function parseReleaseBoxConfig(input: unknown): ReleaseBoxConfig {
 
   if (record.release !== undefined && (!record.release || typeof record.release !== 'object' || Array.isArray(record.release))) throw new Error('release must be an object');
   const release = record.release as Record<string, unknown> | undefined;
+  if (release) rejectUnknownKeys(release, releaseKeys, 'release.');
   if (release?.mode !== undefined && (typeof release.mode !== 'string' || !releaseModeSet.has(release.mode))) throw new Error(`release.mode must be one of: ${releaseModes.join(', ')}`);
   for (const field of ['createGithubRelease', 'publishNpm', 'updateHomebrew'] as const) {
     if (release?.[field] !== undefined && typeof release[field] !== 'boolean') throw new Error(`release.${field} must be a boolean`);

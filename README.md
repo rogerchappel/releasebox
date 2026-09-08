@@ -106,8 +106,9 @@ The configuration schema is:
 
 `projectType` is required and accepts the values listed below. The other fields
 are optional. Each package manager must be `npm`, `homebrew`, or
-`github-release`; each smoke command must be a non-empty array of non-empty
-string arguments; and release mode must be `manual`, `reviewed`, or
+`github-release`; each smoke command must be a non-empty array of string
+arguments that remain non-empty after trimming whitespace (spaces inside a
+legitimate argument are preserved); and release mode must be `manual`, `reviewed`, or
 `tag-gated`. All three publishing flags are booleans. `releasebox check` reports
 a field-specific error and exits nonzero when the file violates this schema;
 it does not report readiness from malformed configuration. Keys are strict at

@@ -35,7 +35,9 @@ test('config parser validates smoke commands and argv strings', () => {
   assert.throws(() => parseReleaseBoxConfig({ projectType: 'node-cli', smoke: { commands: ['npm'] } }), /smoke.commands\[0\]/);
   assert.throws(() => parseReleaseBoxConfig({ projectType: 'node-cli', smoke: { commands: [[]] } }), /smoke.commands\[0\]/);
   assert.throws(() => parseReleaseBoxConfig({ projectType: 'node-cli', smoke: { commands: [['npm', '']] } }), /smoke.commands\[0\]\[1\]/);
+  assert.throws(() => parseReleaseBoxConfig({ projectType: 'node-cli', smoke: { commands: [['npm'], ['test', ' \t ']] } }), /smoke.commands\[1\]\[1\] must be a non-empty string/);
   assert.throws(() => parseReleaseBoxConfig({ projectType: 'node-cli', smoke: { commands: [['npm', 1]] } }), /smoke.commands\[0\]\[1\]/);
+  assert.deepEqual(parseReleaseBoxConfig({ projectType: 'node-cli', smoke: { commands: [['node', '--eval', 'console.log("hello world")']] } }).smoke.commands, [['node', '--eval', 'console.log("hello world")']]);
 });
 
 test('config parser validates release mode and publishing flags', () => {

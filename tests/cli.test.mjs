@@ -32,6 +32,21 @@ test('check reports the precise path for an unknown config key', async () => {
   assert.doesNotMatch(result.stdout, /releasebox config/);
 });
 
+test('check reports the precise argv path for blank smoke arguments', async () => {
+  for (const argument of ['', ' \t ']) {
+    const root = await mkdtemp(join(tmpdir(), 'releasebox-blank-smoke-argument-'));
+    await writeFile(join(root, 'releasebox.config.json'), JSON.stringify({
+      projectType: 'node-cli',
+      smoke: { commands: [['npm', 'test'], ['node', argument]] },
+    }));
+
+    const result = run(['check', root], projectRoot);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /smoke\.commands\[1\]\[1\] must be a non-empty string/);
+    assert.doesNotMatch(result.stdout, /releasebox config/);
+  }
+});
+
 test('init accepts every advertised project type', async () => {
   for (const projectType of projectTypes) {
     const root = await mkdtemp(join(tmpdir(), `releasebox-${projectType}-`));

@@ -56,7 +56,7 @@ export function parseReleaseBoxConfig(input: unknown): ReleaseBoxConfig {
   if (Array.isArray(smoke?.commands)) smoke.commands.forEach((command, commandIndex) => {
     if (!Array.isArray(command) || command.length === 0) throw new Error(`smoke.commands[${commandIndex}] must be a non-empty argv array`);
     command.forEach((argument, argumentIndex) => {
-      if (typeof argument !== 'string' || argument.length === 0) throw new Error(`smoke.commands[${commandIndex}][${argumentIndex}] must be a non-empty string`);
+      if (typeof argument !== 'string' || argument.trim().length === 0) throw new Error(`smoke.commands[${commandIndex}][${argumentIndex}] must be a non-empty string`);
     });
   });
 
